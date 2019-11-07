@@ -9,7 +9,7 @@ TestCase class with GTSAM assert utils.
 Author: Frank Dellaert
 """
 import unittest
-
+import numpy
 
 class GtsamTestCase(unittest.TestCase):
     """TestCase class with GTSAM assert utils."""
@@ -21,7 +21,13 @@ class GtsamTestCase(unittest.TestCase):
             Keyword Arguments:
                 tol {float} -- tolerance passed to 'equals', default 1e-9
         """
-        equal = actual.equals(expected, tol)
+        if issubclass(type(actual), numpy.ndarray):
+            if actual.dtype != expected.dtype:
+                import sys
+                print("\033[31mWARN:\033[0m dtype mismatch: %s != %s" % (actual.dtype, expected.dtype), file=sys.stderr)
+            equal = numpy.allclose(actual, expected, atol=tol)
+        else:
+            equal = actual.equals(expected, tol)
         if not equal:
             raise self.failureException(
                 "Values are not equal:\n{}!={}".format(actual, expected))

@@ -13,8 +13,8 @@ from math import pi
 
 import numpy as np
 
-import gtsam
-from gtsam.utils.test_case import GtsamTestCase
+from gtsam_py import gtsam
+from utils.test_case import GtsamTestCase
 
 
 class TestPlanarSLAM(GtsamTestCase):

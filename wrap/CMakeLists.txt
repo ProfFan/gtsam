@@ -14,7 +14,7 @@ if(GTSAM_INSTALL_PYTHON_TOOLBOX)
       gtsam::Point2Vector
       gtsam::Pose3Vector
       gtsam::BetweenFactorPose3s
-      gtsam::FactorIndices)
+      gtsam::FactorIndices) # these should be properly dealt with by pybind11 STL machinery
 
   # wrap gtsam
   add_custom_target(gtsam_header DEPENDS "../gtsam.h")

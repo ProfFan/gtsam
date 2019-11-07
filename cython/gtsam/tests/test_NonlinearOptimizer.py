@@ -14,12 +14,12 @@ from __future__ import print_function
 
 import unittest
 
-import gtsam
-from gtsam import (DoglegOptimizer, DoglegParams, GaussNewtonOptimizer,
+import numpy as np
+from gtsam_py import gtsam
+from gtsam_py.gtsam import (DoglegOptimizer, DoglegParams, GaussNewtonOptimizer,
                    GaussNewtonParams, LevenbergMarquardtOptimizer,
-                   LevenbergMarquardtParams, NonlinearFactorGraph, Ordering,
-                   Point2, PriorFactorPoint2, Values)
-from gtsam.utils.test_case import GtsamTestCase
+                   LevenbergMarquardtParams, NonlinearFactorGraph, Ordering, PriorFactorPoint2, Values)
+from utils.test_case import GtsamTestCase
 
 KEY1 = 1
 KEY2 = 2
@@ -29,17 +29,17 @@ class TestScenario(GtsamTestCase):
     def test_optimize(self):
         """Do trivial test with three optimizer variants."""
         fg = NonlinearFactorGraph()
-        model = gtsam.noiseModel_Unit.Create(2)
-        fg.add(PriorFactorPoint2(KEY1, Point2(0, 0), model))
+        model = gtsam.noiseModel.Unit.Create(2)
+        fg.add(PriorFactorPoint2(KEY1, np.array([0, 0]), model))
 
         # test error at minimum
-        xstar = Point2(0, 0)
+        xstar = np.array([0, 0])
         optimal_values = Values()
         optimal_values.insert(KEY1, xstar)
         self.assertEqual(0.0, fg.error(optimal_values), 0.0)
 
         # test error at initial = [(1-cos(3))^2 + (sin(3))^2]*50 =
-        x0 = Point2(3, 3)
+        x0 = np.array([3, 3])
         initial_values = Values()
         initial_values.insert(KEY1, x0)
         self.assertEqual(9.0, fg.error(initial_values), 1e-3)

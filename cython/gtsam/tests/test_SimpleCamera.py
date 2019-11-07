@@ -13,16 +13,16 @@ import unittest
 
 import numpy as np
 
-import gtsam
-from gtsam import Cal3_S2, Point3, Pose2, Pose3, Rot3, SimpleCamera
-from gtsam.utils.test_case import GtsamTestCase
+from gtsam_py import gtsam
+from gtsam_py.gtsam import Cal3_S2, Pose2, Pose3, Rot3, SimpleCamera
+from utils.test_case import GtsamTestCase
 
 K = Cal3_S2(625, 625, 0, 0, 0)
 
 class TestSimpleCamera(GtsamTestCase):
 
     def test_constructor(self):
-        pose1 = Pose3(Rot3(np.diag([1, -1, -1])), Point3(0, 0, 0.5))
+        pose1 = Pose3(Rot3(np.diag([1, -1, -1])), np.array([0, 0, 0.5]))
         camera = SimpleCamera(pose1, K)
         self.gtsamAssertEquals(camera.calibration(), K, 1e-9)
         self.gtsamAssertEquals(camera.pose(), pose1, 1e-9)
@@ -33,11 +33,11 @@ class TestSimpleCamera(GtsamTestCase):
         camera = SimpleCamera.Level(K, pose2, 0.1)
 
         # expected
-        x = Point3(1,0,0)
-        y = Point3(0,0,-1)
-        z = Point3(0,1,0)
+        x = np.array([1,0,0])
+        y = np.array([0,0,-1])
+        z = np.array([0,1,0])
         wRc = Rot3(x,y,z)
-        expected = Pose3(wRc,Point3(0.4,0.3,0.1))
+        expected = Pose3(wRc,np.array([0.4,0.3,0.1]))
         self.gtsamAssertEquals(camera.pose(), expected, 1e-9)
 
 

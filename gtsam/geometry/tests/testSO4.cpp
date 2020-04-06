@@ -55,6 +55,8 @@ Vector6 v2 = (Vector(6) << 0.00, 0.00, 0.00, 0.01, 0.02, 0.03).finished();
 SO4 Q2 = SO4::Expmap(v2);
 Vector6 v3 = (Vector(6) << 1, 2, 3, 4, 5, 6).finished();
 SO4 Q3 = SO4::Expmap(v3);
+Vector6 v4 = (Vector(6) << 0.0, 0.0, 1, 1 + 1e-20, 0, 0).finished();
+SO4 Q4 = SO4::Expmap(v4);
 
 //******************************************************************************
 TEST(SO4, Random) {
@@ -71,6 +73,12 @@ TEST(SO4, Expmap) {
   // Same here
   auto R2 = SO3::Expmap(v2.tail<3>()).matrix();
   EXPECT((Q2.matrix().topLeftCorner<3, 3>().isApprox(R2)));
+
+  // Test for very small values
+//  auto R4 = SO3::Expmap(v4.tail<3>()).matrix();
+//  cout << R4 << endl;
+//  cout << Q4.matrix() << endl;
+//  EXPECT((Q4.matrix().topLeftCorner<3, 3>().isApprox(R4, 1e-12)));
 
   // Check commutative subgroups
   for (size_t i = 0; i < 6; i++) {

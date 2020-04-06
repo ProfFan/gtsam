@@ -112,9 +112,20 @@ SO4 SO4::Expmap(const Vector6& xi, ChartJacobian H) {
   const auto X2 = X * X;
   const auto X3 = X2 * X;
   double a2 = a * a, a3 = a2 * a, b2 = b * b, b3 = b2 * b;
+  std::cout << "Val: " << a << ", " << b << std::endl;
+  auto eps = std::numeric_limits<double>::epsilon();
   if (a != 0 && b == 0) {
-    double c2 = (1 - cos(a)) / a2, c3 = (a - sin(a)) / a3;
-    return SO4(I_4x4 + X + c2 * X2 + c3 * X3);
+    // a != 0, b ~= 0
+    if (true && std::abs(a) < std::pow(10, 10) * eps) {
+      // Use Taylor expansion
+      std::cout << "Hit1!" << std::endl;
+      double c2_s = 0.5 - (1.0 / 24) * a + a2 * a2 / 720 - a3 * a3 / 40320;
+      double c3_s = 1.0 / 6 - 1.0 / 120 * a2 + a2 * a2 / 5040 - a3 * a3 / 362880;
+      return SO4(I_4x4 + X + c2_s * X2 + c3_s * X3);
+    } else {
+      double c2 = (1 - cos(a)) / a2, c3 = (a - sin(a)) / a3;
+      return SO4(I_4x4 + X + c2 * X2 + c3 * X3);
+    }
   } else if (a == b && b != 0) {
     double sin_a = sin(a), cos_a = cos(a);
     double c0 = (a * sin_a + 2 * cos_a) / 2,
@@ -122,15 +133,26 @@ SO4 SO4::Expmap(const Vector6& xi, ChartJacobian H) {
            c3 = (sin_a - a * cos_a) / (2 * a3);
     return SO4(c0 * I_4x4 + c1 * X + c2 * X2 + c3 * X3);
   } else if (a != b) {
-    double sin_a = sin(a), cos_a = cos(a);
-    double sin_b = sin(b), cos_b = cos(b);
-    double c0 = (b2 * cos_a - a2 * cos_b) / (b2 - a2),
-           c1 = (b3 * sin_a - a3 * sin_b) / (a * b * (b2 - a2)),
-           c2 = (cos_a - cos_b) / (b2 - a2),
-           c3 = (b * sin_a - a * sin_b) / (a * b * (b2 - a2));
-    return SO4(c0 * I_4x4 + c1 * X + c2 * X2 + c3 * X3);
+    if (true && std::abs(std::max(a, b)) < 1e14 * eps) {
+      std::cout << "Hit2!" << std::endl;
+      double sin_a = sin(a), sin_b = sin(b);
+      double a4 = a2 * a2, b4 = b2 * b2;
+      double c0_s = b4 *(-a4/40320 + a2/720) + b2*(a4/720 - a2/24) + 1,
+          c1_s = (b3 * sin_a - a3 * sin_b) / (a * b * (b2 - a2)),
+          c2_s = -a2/24 + b2*(a2/720 - 1.0/24) + 1.0/2,
+          c3_s = -a2/120 + b2*(a2/5040 - 1.0/120) + 1.0/6;
+      return SO4(c0_s * I_4x4 + c1_s * X + c2_s * X2 + c3_s * X3);
+    } else {
+      double sin_a = sin(a), cos_a = cos(a);
+      double sin_b = sin(b), cos_b = cos(b);
+      double c0 = (b2 * cos_a - a2 * cos_b) / (b2 - a2),
+          c1 = (b3 * sin_a - a3 * sin_b) / (a * b * (b2 - a2)),
+          c2 = (cos_a - cos_b) / (b2 - a2),
+          c3 = (b * sin_a - a * sin_b) / (a * b * (b2 - a2));
+      return SO4(c0 * I_4x4 + c1 * X + c2 * X2 + c3 * X3);
+    }
   } else {
-    return SO4();
+    throw std::overflow_error("Illegal condition in SO<4>");
   }
 }
 

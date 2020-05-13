@@ -37,7 +37,6 @@
 
 // In GTSAM, measurement functions are represented as 'factors'. Several common factors
 // have been provided with the library for solving robotics SLAM problems.
-#include <gtsam/slam/PriorFactor.h>
 #include <gtsam/slam/BetweenFactor.h>
 #include <gtsam/sam/RangeFactor.h>
 #include <gtsam_unstable/slam/SmartRangeFactor.h>
@@ -127,7 +126,7 @@ int main(int argc, char** argv) {
   Pose2 pose0 = Pose2(-34.2086489999201, 45.3007639991120,
       M_PI - 2.02108900000000);
   NonlinearFactorGraph newFactors;
-  newFactors.push_back(PriorFactor<Pose2>(0, pose0, priorNoise));
+  newFactors.addPrior(0, pose0, priorNoise);
 
   ofstream os2("rangeResultLM.txt");
   ofstream os3("rangeResultSR.txt");
@@ -198,7 +197,7 @@ int main(int argc, char** argv) {
               rangeNoise);
           // Throw out obvious outliers based on current landmark estimates
           Vector error = factor.unwhitenedError(landmarkEstimates);
-          if (k <= 200 || fabs(error[0]) < 5)
+          if (k <= 200 || std::abs(error[0]) < 5)
             newFactors.push_back(factor);
         }
         totalCount += 1;

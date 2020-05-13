@@ -10,7 +10,7 @@ endif()
 # Set the version number for the library
 set (GTSAM_VERSION_MAJOR 4)
 set (GTSAM_VERSION_MINOR 0)
-set (GTSAM_VERSION_PATCH 0)
+set (GTSAM_VERSION_PATCH 2)
 math (EXPR GTSAM_VERSION_NUMERIC "10000 * ${GTSAM_VERSION_MAJOR} + 100 * ${GTSAM_VERSION_MINOR} + ${GTSAM_VERSION_PATCH}")
 set (GTSAM_VERSION_STRING "${GTSAM_VERSION_MAJOR}.${GTSAM_VERSION_MINOR}.${GTSAM_VERSION_PATCH}")
 
@@ -73,7 +73,7 @@ option(GTSAM_ENABLE_CONSISTENCY_CHECKS   "Enable/Disable expensive consistency c
 option(GTSAM_WITH_TBB                    "Use Intel Threaded Building Blocks (TBB) if available" ON)
 option(GTSAM_WITH_EIGEN_MKL              "Eigen will use Intel MKL if available" OFF)
 option(GTSAM_WITH_EIGEN_MKL_OPENMP       "Eigen, when using Intel MKL, will also use OpenMP for multithreading if available" OFF)
-option(GTSAM_THROW_CHEIRALITY_EXCEPTION "Throw exception when a triangulated point is behind a camera" ON)
+option(GTSAM_THROW_CHEIRALITY_EXCEPTION  "Throw exception when a triangulated point is behind a camera" ON)
 option(GTSAM_ALLOW_DEPRECATED_SINCE_V4   "Allow use of methods/functions deprecated in GTSAM 4" ON)
 option(GTSAM_TYPEDEF_POINTS_TO_VECTORS   "Typedef Point2 and Point3 to Eigen::Vector equivalents" OFF)
 option(GTSAM_SUPPORT_NESTED_DISSECTION   "Support Metis-based nested dissection" ON)
@@ -88,7 +88,7 @@ if(NOT MSVC AND NOT XCODE_VERSION)
 
   # Set the GTSAM_BUILD_TAG variable.
   # If build type is Release, set to blank (""), else set to the build type.
-  if("${CMAKE_BUILD_TYPE_UPPER}" STREQUAL "RELEASE")
+  if(${CMAKE_BUILD_TYPE_UPPER} STREQUAL "RELEASE")
    set(GTSAM_BUILD_TAG "") # Don't create release mode tag on installed directory
   else()
    set(GTSAM_BUILD_TAG "${CMAKE_BUILD_TYPE}")
@@ -171,49 +171,26 @@ if(NOT Boost_SERIALIZATION_LIBRARY OR NOT Boost_SYSTEM_LIBRARY OR NOT Boost_FILE
   message(FATAL_ERROR "Missing required Boost components >= v1.43, please install/upgrade Boost or configure your search paths.")
 endif()
 
-# Allow for not using the timer libraries on boost < 1.48 (GTSAM timing code falls back to old timer library)
 option(GTSAM_DISABLE_NEW_TIMERS "Disables using Boost.chrono for timing" OFF)
-
-# JLBC: This was once updated to target-based names (Boost::xxx), but it caused
-# problems with Boost versions newer than FindBoost.cmake was prepared to handle,
-# so we downgraded this to classic filenames-based variables, and manually adding
-# the target_include_directories(xxx ${Boost_INCLUDE_DIR})
+# Allow for not using the timer libraries on boost < 1.48 (GTSAM timing code falls back to old timer library)
 set(GTSAM_BOOST_LIBRARIES
-  optimized ${Boost_SERIALIZATION_LIBRARY_RELEASE}
-  optimized ${Boost_SYSTEM_LIBRARY_RELEASE}
-  optimized ${Boost_FILESYSTEM_LIBRARY_RELEASE}
-  optimized ${Boost_THREAD_LIBRARY_RELEASE}
-  optimized ${Boost_DATE_TIME_LIBRARY_RELEASE}
-  optimized ${Boost_REGEX_LIBRARY_RELEASE}
-  debug ${Boost_SERIALIZATION_LIBRARY_DEBUG}
-  debug ${Boost_SYSTEM_LIBRARY_DEBUG}
-  debug ${Boost_FILESYSTEM_LIBRARY_DEBUG}
-  debug ${Boost_THREAD_LIBRARY_DEBUG}
-  debug ${Boost_DATE_TIME_LIBRARY_DEBUG}
-  debug ${Boost_REGEX_LIBRARY_DEBUG}
+  Boost::serialization
+  Boost::system
+  Boost::filesystem
+  Boost::thread
+  Boost::date_time
+  Boost::regex
 )
-message(STATUS "GTSAM_BOOST_LIBRARIES: ${GTSAM_BOOST_LIBRARIES}")
 if (GTSAM_DISABLE_NEW_TIMERS)
     message("WARNING:  GTSAM timing instrumentation manually disabled")
     list_append_cache(GTSAM_COMPILE_DEFINITIONS_PUBLIC DGTSAM_DISABLE_NEW_TIMERS)
 else()
     if(Boost_TIMER_LIBRARY)
-      list(APPEND GTSAM_BOOST_LIBRARIES
-        optimized ${Boost_TIMER_LIBRARY_RELEASE}
-        optimized ${Boost_CHRONO_LIBRARY_RELEASE}
-        debug ${Boost_TIMER_LIBRARY_DEBUG}
-        debug ${Boost_CHRONO_LIBRARY_DEBUG}
-        )
+      list(APPEND GTSAM_BOOST_LIBRARIES Boost::timer Boost::chrono)
     else()
       list(APPEND GTSAM_BOOST_LIBRARIES rt) # When using the header-only boost timer library, need -lrt
       message("WARNING:  GTSAM timing instrumentation will use the older, less accurate, Boost timer library because boost older than 1.48 was found.")
     endif()
-endif()
-
-
-if(NOT (${Boost_VERSION} LESS 105600))
-	message("Ignoring Boost restriction on optional lvalue assignment from rvalues")
-	list_append_cache(GTSAM_COMPILE_DEFINITIONS_PUBLIC BOOST_OPTIONAL_ALLOW_BINDING_TO_RVALUES BOOST_OPTIONAL_CONFIG_ALLOW_BINDING_TO_RVALUES)
 endif()
 
 ###############################################################################
@@ -222,12 +199,17 @@ find_package(TBB 4.4 COMPONENTS tbb tbbmalloc)
 
 # Set up variables if we're using TBB
 if(TBB_FOUND AND GTSAM_WITH_TBB)
-	set(GTSAM_USE_TBB 1)  # This will go into config.h
-  # all definitions and link requisites will go via imported targets:
-  # tbb & tbbmalloc
-  list(APPEND GTSAM_ADDITIONAL_LIBRARIES tbb tbbmalloc)
+    set(GTSAM_USE_TBB 1)  # This will go into config.h
+    if ((${TBB_VERSION_MAJOR} GREATER 2020) OR (${TBB_VERSION_MAJOR} EQUAL 2020))
+        set(TBB_GREATER_EQUAL_2020 1)
+    else()
+        set(TBB_GREATER_EQUAL_2020 0)
+    endif()
+    # all definitions and link requisites will go via imported targets:
+    # tbb & tbbmalloc
+    list(APPEND GTSAM_ADDITIONAL_LIBRARIES tbb tbbmalloc)
 else()
-	set(GTSAM_USE_TBB 0)  # This will go into config.h
+    set(GTSAM_USE_TBB 0)  # This will go into config.h
 endif()
 
 ###############################################################################
@@ -293,6 +275,7 @@ endif()
 ### See:  http://eigen.tuxfamily.org/bz/show_bug.cgi?id=704 (Householder QR MKL selection)
 ###       http://eigen.tuxfamily.org/bz/show_bug.cgi?id=705 (Fix MKL LLT return code)
 option(GTSAM_USE_SYSTEM_EIGEN "Find and use system-installed Eigen. If 'off', use the one bundled with GTSAM" OFF)
+option(GTSAM_WITH_EIGEN_UNSUPPORTED "Install Eigen's unsupported modules" OFF)
 
 # Switch for using system Eigen or GTSAM-bundled Eigen
 if(GTSAM_USE_SYSTEM_EIGEN)
@@ -359,6 +342,11 @@ if (MSVC)
 		list_append_cache(GTSAM_COMPILE_DEFINITIONS_PUBLIC EIGEN_NO_STATIC_ASSERT)
 	endif()
 	list_append_cache(GTSAM_COMPILE_OPTIONS_PRIVATE "/wd4244") # Disable loss of precision which is thrown all over our Eigen
+endif()
+
+if (APPLE AND BUILD_SHARED_LIBS)
+	# Set the default install directory on macOS
+	set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
 endif()
 
 ###############################################################################
@@ -433,6 +421,10 @@ add_subdirectory(CppUnitLite)
 # Build wrap
 if (GTSAM_BUILD_WRAP)
     add_subdirectory(wrap)
+	# suppress warning of cython line being too long
+	if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-misleading-indentation")
+	endif()
 endif(GTSAM_BUILD_WRAP)
 
 # Build GTSAM library
@@ -450,7 +442,7 @@ add_subdirectory(timing)
 # Build gtsam_unstable
 if (GTSAM_BUILD_UNSTABLE)
     add_subdirectory(gtsam_unstable)
-endif(GTSAM_BUILD_UNSTABLE)
+endif()
 
 # Matlab toolbox
 if (GTSAM_INSTALL_MATLAB_TOOLBOX)
@@ -572,6 +564,12 @@ else()
 	message(STATUS "  Eigen will use MKL and OpenMP  : OpenMP not found")
 endif()
 message(STATUS "  Default allocator              : ${GTSAM_DEFAULT_ALLOCATOR}")
+
+if(GTSAM_THROW_CHEIRALITY_EXCEPTION)
+	message(STATUS "  Cheirality exceptions enabled  : YES")
+else()
+	message(STATUS "  Cheirality exceptions enabled  : NO")
+endif()
 
 if(NOT MSVC AND NOT XCODE_VERSION)
 	if(CCACHE_FOUND AND GTSAM_BUILD_WITH_CCACHE)

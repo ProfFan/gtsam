@@ -29,7 +29,7 @@
 #include <gtsam/inference/Key.h>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/iterator/filter_iterator.hpp>
-#include <boost/ptr_container/serialize_ptr_map.hpp>
+#include <boost/ptr_container/ptr_map.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include <string>
@@ -84,10 +84,10 @@ namespace gtsam {
   public:
 
     /// A shared_ptr to this class
-    typedef boost::shared_ptr<Values> shared_ptr;
+    typedef std::shared_ptr<Values> shared_ptr;
 
     /// A const shared_ptr to this class
-    typedef boost::shared_ptr<const Values> const_shared_ptr;
+    typedef std::shared_ptr<const Values> const_shared_ptr;
 
     /// A key-value pair, which you get by dereferencing iterators
     struct GTSAM_EXPORT KeyValuePair {
@@ -406,10 +406,15 @@ namespace gtsam {
     }
 
     /** Serialization function */
-    friend class boost::serialization::access;
+    friend class cereal::access;
     template<class ARCHIVE>
-    void serialize(ARCHIVE & ar, const unsigned int /*version*/) {
-      ar & BOOST_SERIALIZATION_NVP(values_);
+    void save(ARCHIVE & ar, const unsigned int version) const {
+      ar << CEREAL_NVP(values_);
+    }
+
+    template<class ARCHIVE>
+    void load(ARCHIVE & ar, const unsigned int version) {
+      ar >> CEREAL_NVP(values_);
     }
 
     static ConstKeyValuePair make_const_deref_pair(const KeyValueMap::const_iterator::value_type& key_value) {
@@ -538,5 +543,48 @@ namespace gtsam {
 
 } //\ namespace gtsam
 
+namespace cereal {
+  template<class T_>
+  void ptr_map_deleter(T_*) {}
 
+  template<class T_>
+  struct ptr_map_unique_deleter
+  {
+    void operator()(T_* p) const {}
+  };
+
+  template<class Archive,
+          class Key_,
+          class T_,
+          class Compare_,
+          class CloneAllocator_,
+          class Allocator_>
+  void save(Archive &ar, const boost::ptr_map<Key_, T_, Compare_, CloneAllocator_, Allocator_> &values_) {
+    ar( cereal::make_size_tag( values_.size() ) );
+    for (auto&& key_value : values_) {
+      ar (cereal::make_map_item(key_value.first, std::unique_ptr<T_, ptr_map_unique_deleter<T_>>(const_cast<T_*>(key_value.second))));
+    }
+  }
+
+  template<class Archive,
+          class Key_,
+          class T_,
+          class Compare_,
+          class CloneAllocator_,
+          class Allocator_>
+  void load(Archive &ar, boost::ptr_map<Key_, T_, Compare_, CloneAllocator_, Allocator_> &values_) {
+    cereal::size_type size;
+    ar >> cereal::make_size_tag( size );
+
+    values_.clear();
+
+    for( auto i = 0; i < size; ++i )
+    {
+      Key_ key;
+      std::unique_ptr<T_, ptr_map_unique_deleter<T_>> value;
+      ar >> cereal::make_map_item(key, value);
+      values_.insert(key, value.get());
+    }
+  }
+}
 #include <gtsam/nonlinear/Values-inl.h>

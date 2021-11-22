@@ -77,7 +77,7 @@ Constraint::shared_ptr Domain::partiallyApply(const Values& values) const {
   Values::const_iterator it = values.find(keys_[0]);
   if (it != values.end() && !contains(it->second))
     throw runtime_error("Domain::partiallyApply: unsatisfiable");
-  return boost::make_shared<Domain>(*this);
+  return std::make_shared<Domain>(*this);
 }
 
 /* ************************************************************************* */
@@ -86,7 +86,7 @@ Constraint::shared_ptr Domain::partiallyApply(
   const Domain& Dk = domains[keys_[0]];
   if (Dk.isSingleton() && !contains(*Dk.begin()))
     throw runtime_error("Domain::partiallyApply: unsatisfiable");
-  return boost::make_shared<Domain>(Dk);
+  return std::make_shared<Domain>(Dk);
 }
 
 /* ************************************************************************* */

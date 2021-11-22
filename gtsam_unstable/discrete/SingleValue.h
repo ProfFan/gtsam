@@ -27,7 +27,7 @@ class GTSAM_UNSTABLE_EXPORT SingleValue : public Constraint {
   }
 
  public:
-  typedef boost::shared_ptr<SingleValue> shared_ptr;
+  typedef std::shared_ptr<SingleValue> shared_ptr;
 
   /// Constructor
   SingleValue(Key key, size_t n, size_t value)

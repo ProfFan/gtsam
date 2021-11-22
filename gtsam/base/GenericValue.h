@@ -23,8 +23,9 @@
 #include <gtsam/base/types.h>
 #include <gtsam/base/Value.h>
 
-#include <boost/make_shared.hpp>
 #include <boost/pool/pool_alloc.hpp>
+
+#include <cereal/types/polymorphic.hpp>
 
 #include <cmath>
 #include <iostream>
@@ -114,8 +115,8 @@ public:
     /**
      * Clone this value (normal clone on the heap, delete with 'delete' operator)
      */
-    boost::shared_ptr<Value> clone() const override {
-		return boost::allocate_shared<GenericValue>(Eigen::aligned_allocator<GenericValue>(), *this);
+    std::shared_ptr<Value> clone() const override {
+		return std::allocate_shared<GenericValue>(Eigen::aligned_allocator<GenericValue>(), *this);
     }
 
     /// Generic Value interface version of retract
@@ -177,14 +178,18 @@ public:
   private:
 
     /** Serialization function */
-    friend class boost::serialization::access;
+    friend class cereal::access;
     template<class ARCHIVE>
-    void serialize(ARCHIVE & ar, const unsigned int /*version*/) {
-      ar & boost::serialization::make_nvp("GenericValue",
-              boost::serialization::base_object<Value>(*this));
-      ar & boost::serialization::make_nvp("value", value_);
-	}
+    void save(ARCHIVE & ar, const unsigned int /*version*/) const {
+      ar (cereal::base_class<Value>(this));
+      ar (cereal::make_nvp("value", value_));
+	  }
 
+    template<class ARCHIVE>
+    void load(ARCHIVE & ar, const unsigned int /*version*/) {
+      ar (cereal::base_class<Value>(this));
+      ar (cereal::make_nvp("value", value_));
+    }
 
   // Alignment, see https://eigen.tuxfamily.org/dox/group__TopicStructHavingEigenMembers.html
   enum { NeedsToAlign = (sizeof(T) % 16) == 0 };
@@ -193,7 +198,7 @@ public:
 };
 
 /// use this macro instead of BOOST_CLASS_EXPORT for GenericValues
-#define GTSAM_VALUE_EXPORT(Type) BOOST_CLASS_EXPORT(gtsam::GenericValue<Type>)
+#define GTSAM_VALUE_EXPORT(Type) CEREAL_REGISTER_TYPE(gtsam::GenericValue<Type>)
 
 // traits
 template <typename ValueType>
@@ -215,3 +220,9 @@ GenericValue<T> genericValue(const T& v) {
 
 
 } /* namespace gtsam */
+
+namespace cereal
+{
+  template <class Archive, typename VALUE>
+  struct specialize<Archive, gtsam::GenericValue<VALUE>, cereal::specialization::member_load_save> {};
+}

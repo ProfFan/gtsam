@@ -170,7 +170,7 @@ public:
 
   /// @return a deep copy of this factor
   gtsam::NonlinearFactor::shared_ptr clone() const override {
-    return boost::static_pointer_cast<gtsam::NonlinearFactor>(
+    return std::static_pointer_cast<gtsam::NonlinearFactor>(
         gtsam::NonlinearFactor::shared_ptr(new This(*this)));
   }
 
@@ -181,15 +181,15 @@ public:
 private:
 
   /// Serialization function
-  friend class boost::serialization::access;
+  friend class cereal::access;
   template<class ARCHIVE>
   void serialize(ARCHIVE & ar, const unsigned int /*version*/) {
     ar
-        & boost::serialization::make_nvp("NoiseModelFactor1",
-            boost::serialization::base_object<Base>(*this));
-    ar & BOOST_SERIALIZATION_NVP(feasible_);
-    ar & BOOST_SERIALIZATION_NVP(allow_error_);
-    ar & BOOST_SERIALIZATION_NVP(error_gain_);
+        & cereal::make_nvp("NoiseModelFactor1",
+            cereal::base_class<Base>(this));
+    ar & CEREAL_NVP(feasible_);
+    ar & CEREAL_NVP(allow_error_);
+    ar & CEREAL_NVP(error_gain_);
   }
 
 };
@@ -223,7 +223,7 @@ protected:
 
 public:
 
-  typedef boost::shared_ptr<NonlinearEquality1<VALUE> > shared_ptr;
+  typedef std::shared_ptr<NonlinearEquality1<VALUE> > shared_ptr;
 
   /**
    * Constructor
@@ -242,7 +242,7 @@ public:
 
   /// @return a deep copy of this factor
   gtsam::NonlinearFactor::shared_ptr clone() const override {
-    return boost::static_pointer_cast<gtsam::NonlinearFactor>(
+    return std::static_pointer_cast<gtsam::NonlinearFactor>(
         gtsam::NonlinearFactor::shared_ptr(new This(*this)));
   }
 
@@ -269,13 +269,13 @@ public:
 private:
 
   /// Serialization function
-  friend class boost::serialization::access;
+  friend class cereal::access;
   template<class ARCHIVE>
   void serialize(ARCHIVE & ar, const unsigned int /*version*/) {
     ar
-        & boost::serialization::make_nvp("NoiseModelFactor1",
-            boost::serialization::base_object<Base>(*this));
-    ar & BOOST_SERIALIZATION_NVP(value_);
+        & cereal::make_nvp("NoiseModelFactor1",
+            cereal::base_class<Base>(this));
+    ar & CEREAL_NVP(value_);
   }
 };
 // \NonlinearEquality1
@@ -301,7 +301,7 @@ class NonlinearEquality2 : public NoiseModelFactor2<T, T> {
   NonlinearEquality2() {}
 
  public:
-  typedef boost::shared_ptr<NonlinearEquality2<T>> shared_ptr;
+  typedef std::shared_ptr<NonlinearEquality2<T>> shared_ptr;
 
   /**
    * Constructor
@@ -316,7 +316,7 @@ class NonlinearEquality2 : public NoiseModelFactor2<T, T> {
 
   /// @return a deep copy of this factor
   gtsam::NonlinearFactor::shared_ptr clone() const override {
-    return boost::static_pointer_cast<gtsam::NonlinearFactor>(
+    return std::static_pointer_cast<gtsam::NonlinearFactor>(
         gtsam::NonlinearFactor::shared_ptr(new This(*this)));
   }
 
@@ -334,11 +334,11 @@ class NonlinearEquality2 : public NoiseModelFactor2<T, T> {
 
  private:
   /// Serialization function
-  friend class boost::serialization::access;
+  friend class cereal::access;
   template <class ARCHIVE>
   void serialize(ARCHIVE& ar, const unsigned int /*version*/) {
-    ar& boost::serialization::make_nvp(
-        "NoiseModelFactor2", boost::serialization::base_object<Base>(*this));
+    ar& cereal::make_nvp(
+        "NoiseModelFactor2", cereal::base_class<Base>(this));
   }
 };
 // \NonlinearEquality2

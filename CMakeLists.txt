@@ -1,6 +1,8 @@
 project(GTSAM CXX C)
 cmake_minimum_required(VERSION 3.0)
 
+set(CMAKE_CXX_STANDARD 17)
+
 # new feature to Cmake Version > 2.8.12
 # Mac ONLY. Define Relative Path on Mac OS
 if(NOT DEFINED CMAKE_MACOSX_RPATH)
@@ -29,9 +31,6 @@ include(GNUInstallDirs)
 # Load build type flags and default to Debug mode
 include(GtsamBuildTypes)
 
-# Use macros for creating tests/timing scripts
-include(GtsamTesting)
-include(GtsamPrinting)
 
 # guard against in-source builds
 if(${GTSAM_SOURCE_DIR} STREQUAL ${GTSAM_BINARY_DIR})
@@ -41,7 +40,16 @@ endif()
 include(cmake/HandleGeneralOptions.cmake)   # CMake build options
 
 # Libraries:
-include(cmake/HandleBoost.cmake)            # Boost
+find_package(cereal REQUIRED)
+list(APPEND GTSAM_ADDITIONAL_LIBRARIES cereal)
+
+find_package(fmt REQUIRED)
+list(APPEND GTSAM_ADDITIONAL_LIBRARIES fmt::fmt)
+
+find_package(range-v3 REQUIRED)
+list(APPEND GTSAM_ADDITIONAL_LIBRARIES range-v3)
+
+#include(cmake/HandleBoost.cmake)            # Boost
 include(cmake/HandleCCache.cmake)           # ccache
 include(cmake/HandleCPack.cmake)            # CPack
 include(cmake/HandleEigen.cmake)            # Eigen3
@@ -56,6 +64,10 @@ include(cmake/HandleUninstall.cmake)        # for "make uninstall"
 include(cmake/HandleAllocators.cmake)       # Must be after tbb, pertools
 
 include(cmake/HandleGlobalBuildFlags.cmake) # Build flags
+
+# Use macros for creating tests/timing scripts
+include(GtsamTesting)
+include(GtsamPrinting)
 
 ###############################################################################
 # Add components

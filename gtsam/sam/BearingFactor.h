@@ -77,11 +77,11 @@ struct BearingFactor : public ExpressionFactorN<T, A1, A2> {
 
 
  private:
-  friend class boost::serialization::access;
+  friend class cereal::access;
   template <class ARCHIVE>
   void serialize(ARCHIVE& ar, const unsigned int /*version*/) {
-    ar& boost::serialization::make_nvp(
-        "Base", boost::serialization::base_object<Base>(*this));
+    ar& cereal::make_nvp(
+        "Base", cereal::base_class<Base>(this));
   }
 };  // BearingFactor
 
@@ -91,3 +91,9 @@ struct traits<BearingFactor<A1, A2, T> >
     : public Testable<BearingFactor<A1, A2, T> > {};
 
 }  // namespace gtsam
+
+namespace cereal
+{
+  template <class Archive, typename A1, typename A2, typename T>
+  struct specialize<Archive, gtsam::BearingFactor<A1, A2, T>, cereal::specialization::member_serialize> {};
+}

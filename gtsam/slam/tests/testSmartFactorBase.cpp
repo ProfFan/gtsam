@@ -42,9 +42,9 @@ public:
                 size_t expectedNumberCameras = 10)
       : Base(sharedNoiseModel, body_P_sensor, expectedNumberCameras) {}
   double error(const Values& values) const override { return 0.0; }
-  boost::shared_ptr<GaussianFactor> linearize(
+  std::shared_ptr<GaussianFactor> linearize(
       const Values& values) const override {
-    return boost::shared_ptr<GaussianFactor>(new JacobianFactor());
+    return std::shared_ptr<GaussianFactor>(new JacobianFactor());
   }
 };
 
@@ -108,9 +108,9 @@ public:
   double error(const Values& values) const override {
     return 0.0;
   }
-  boost::shared_ptr<GaussianFactor> linearize(
+  std::shared_ptr<GaussianFactor> linearize(
       const Values& values) const override {
-    return boost::shared_ptr<GaussianFactor>(new JacobianFactor());
+    return std::shared_ptr<GaussianFactor>(new JacobianFactor());
   }
 };
 
@@ -127,13 +127,11 @@ TEST(SmartFactorBase, Stereo) {
 }
 
 /* ************************************************************************* */
-BOOST_CLASS_EXPORT_GUID(gtsam::noiseModel::Constrained, "gtsam_noiseModel_Constrained")
-BOOST_CLASS_EXPORT_GUID(gtsam::noiseModel::Diagonal, "gtsam_noiseModel_Diagonal")
-BOOST_CLASS_EXPORT_GUID(gtsam::noiseModel::Gaussian, "gtsam_noiseModel_Gaussian")
-BOOST_CLASS_EXPORT_GUID(gtsam::noiseModel::Unit, "gtsam_noiseModel_Unit")
-BOOST_CLASS_EXPORT_GUID(gtsam::noiseModel::Isotropic, "gtsam_noiseModel_Isotropic")
-BOOST_CLASS_EXPORT_GUID(gtsam::SharedNoiseModel, "gtsam_SharedNoiseModel")
-BOOST_CLASS_EXPORT_GUID(gtsam::SharedDiagonal, "gtsam_SharedDiagonal")
+CEREAL_REGISTER_TYPE_WITH_NAME(gtsam::noiseModel::Constrained, "gtsam_noiseModel_Constrained")
+CEREAL_REGISTER_TYPE_WITH_NAME(gtsam::noiseModel::Diagonal, "gtsam_noiseModel_Diagonal")
+CEREAL_REGISTER_TYPE_WITH_NAME(gtsam::noiseModel::Gaussian, "gtsam_noiseModel_Gaussian")
+CEREAL_REGISTER_TYPE_WITH_NAME(gtsam::noiseModel::Unit, "gtsam_noiseModel_Unit")
+CEREAL_REGISTER_TYPE_WITH_NAME(gtsam::noiseModel::Isotropic, "gtsam_noiseModel_Isotropic")
 
 TEST(SmartFactorBase, serialize) {
   using namespace gtsam::serializationTestHelpers;

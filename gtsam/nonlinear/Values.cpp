@@ -212,7 +212,7 @@ namespace gtsam {
     return result;
   }
 
-  /* ************************************************************************* */
+/* ************************************************************************* */
   const char* ValuesKeyAlreadyExists::what() const noexcept {
     if(message_.empty())
       message_ =

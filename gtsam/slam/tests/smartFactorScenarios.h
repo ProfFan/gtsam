@@ -119,7 +119,7 @@ typedef PinholePose<Cal3Bundler> Camera;
 typedef CameraSet<Camera> Cameras;
 typedef SmartProjectionPoseFactor<Cal3Bundler> SmartFactor;
 typedef SmartProjectionRigFactor<Camera> SmartRigFactor;
-static boost::shared_ptr<Cal3Bundler> sharedBundlerK(
+static std::shared_ptr<Cal3Bundler> sharedBundlerK(
     new Cal3Bundler(500, 1e-3, 1e-3, 1000, 2000));
 Camera level_camera(level_pose, sharedBundlerK);
 Camera level_camera_right(pose_right, sharedBundlerK);

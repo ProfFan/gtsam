@@ -29,6 +29,12 @@ using namespace std::placeholders;
 using namespace std;
 using namespace gtsam;
 
+CEREAL_REGISTER_TYPE(gtsam::noiseModel::Constrained);
+CEREAL_REGISTER_TYPE(gtsam::noiseModel::Diagonal);
+CEREAL_REGISTER_TYPE(gtsam::noiseModel::Gaussian);
+CEREAL_REGISTER_TYPE(gtsam::noiseModel::Unit);
+CEREAL_REGISTER_TYPE(gtsam::noiseModel::Isotropic);
+
 // *************************************************************************
 TEST( Rot3AttitudeFactor, Constructor ) {
 
@@ -62,11 +68,6 @@ TEST( Rot3AttitudeFactor, Constructor ) {
   // Verify we get the expected error
   EXPECT(assert_equal(expectedH, actualH, 1e-8));
 }
-
-/* ************************************************************************* */
-// Export Noisemodels
-// See http://www.boost.org/doc/libs/1_32_0/libs/serialization/doc/special.html
-BOOST_CLASS_EXPORT(gtsam::noiseModel::Isotropic)
 
 /* ************************************************************************* */
 TEST(Rot3AttitudeFactor, Serialization) {

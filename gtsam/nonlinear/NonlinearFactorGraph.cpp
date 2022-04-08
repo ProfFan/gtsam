@@ -28,9 +28,11 @@
 #include <gtsam/inference/Ordering.h>
 #include <gtsam/inference/FactorGraph-inst.h>
 #include <gtsam/config.h> // for GTSAM_USE_TBB
+#include <numeric>
 
 #ifdef GTSAM_USE_TBB
 #  include <tbb/parallel_for.h>
+#  include <tbb/parallel_reduce.h>
 #endif
 
 #include <algorithm>
@@ -170,11 +172,23 @@ void NonlinearFactorGraph::saveGraph(const std::string& filename,
 double NonlinearFactorGraph::error(const Values& values) const {
   gttic(NonlinearFactorGraph_error);
   double total_error = 0.;
+#ifdef GTSAM_USE_TBB
+  // iterate over all the factors_ to accumulate the log probabilities
+  total_error = tbb::parallel_reduce(tbb::blocked_range<size_t>(0, size(), 30), 0.0,
+                    [&](const tbb::blocked_range<size_t>& blocked_range, double sum) {
+                      for (auto i = blocked_range.begin();
+                           i < blocked_range.end(); i++) {
+                        if (this->at(i)) sum += this->at(i)->error(values);
+                      }
+                      return sum;
+                    }, std::plus<double>(), tbb::simple_partitioner());
+#else
   // iterate over all the factors_ to accumulate the log probabilities
   for(const sharedFactor& factor: factors_) {
     if(factor)
       total_error += factor->error(values);
   }
+#endif
   return total_error;
 }
 

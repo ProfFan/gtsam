@@ -495,7 +495,7 @@ Vector JacobianFactor::error_vector(const VectorValues& c) const {
 
 /* ************************************************************************* */
 double JacobianFactor::error(const VectorValues& c) const {
-  Vector e = unweighted_error(c);
+  Eigen::Matrix<double, Eigen::Dynamic, 1, 0, 100, 1> e = unweighted_error(c);
   // Use the noise model distance function to get the correct error if available.
   if (model_) return 0.5 * model_->squaredMahalanobisDistance(e);
   return 0.5 * e.dot(e);

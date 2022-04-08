@@ -140,9 +140,9 @@ JunctionTree<BAYESTREE, GRAPH>::JunctionTree(
   Data rootData(0);
   rootData.myJTNode = boost::make_shared<typename Base::Node>(); // Make a dummy node to gather
                                                                  // the junction tree roots
-  treeTraversal::DepthFirstForest(eliminationTree, rootData,
+  treeTraversal::DepthFirstForestParallel(eliminationTree, rootData,
       Data::ConstructorTraversalVisitorPre,
-      Data::ConstructorTraversalVisitorPostAlg2);
+      Data::ConstructorTraversalVisitorPostAlg2, 20);
 
   // Assign roots from the dummy node
   this->addChildrenAsRoots(rootData.myJTNode);

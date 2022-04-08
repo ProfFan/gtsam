@@ -71,6 +71,10 @@ namespace gtsam {
       Factors factors; ///< factors associated with root
       Children children; ///< sub-trees
 
+      size_t problemSize() {
+        return factors.size();
+      }
+
       sharedFactor eliminate(const boost::shared_ptr<BayesNetType>& output,
         const Eliminate& function, const FastVector<sharedFactor>& childrenFactors) const;
 

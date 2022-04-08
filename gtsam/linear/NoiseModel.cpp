@@ -77,7 +77,7 @@ Vector Base::sigmas() const {
 /* ************************************************************************* */
 double Base::squaredMahalanobisDistance(const Vector& v) const {
   // Note: for Diagonal, which does ediv_, will be correct for constraints
-  Vector w = whiten(v);
+  Eigen::Matrix<double, Eigen::Dynamic, 1, 0, 100, 1> w = whiten(v);
   return w.dot(w);
 }
 

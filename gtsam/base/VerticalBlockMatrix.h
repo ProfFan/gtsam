@@ -21,6 +21,8 @@
 #include <gtsam/base/MatrixSerialization.h>
 #include <gtsam/base/FastVector.h>
 
+#include <Eigen/src/Core/util/Memory.h>
+
 namespace gtsam {
 
   // Forward declarations
@@ -47,7 +49,7 @@ namespace gtsam {
     typedef Eigen::Block<const Matrix> constBlock;
 
   protected:
-    Matrix matrix_; ///< The full matrix
+    Eigen::MatrixXd matrix_; ///< The full matrix
     FastVector<DenseIndex> variableColOffsets_; ///< the starting columns of each block (0-based)
 
     DenseIndex rowStart_; ///< Changes apparent matrix view, see main class comment.

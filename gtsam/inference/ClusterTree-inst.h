@@ -134,12 +134,14 @@ struct EliminationData {
       , writeLock(boost::make_shared<std::mutex>())
 #endif
     {
+      childFactors.reserve(nChildren);
+
     if (parentData) {
 #ifdef GTSAM_USE_TBB
       parentData->writeLock->lock();
 #endif
       myIndexInParent = parentData->childFactors.size();
-      parentData->childFactors.push_back(sharedFactor());
+      parentData->childFactors.emplace_back();
 #ifdef GTSAM_USE_TBB
       parentData->writeLock->unlock();
 #endif
@@ -256,7 +258,7 @@ EliminatableClusterTree<BAYESTREE, GRAPH>::eliminate(const Eliminate& function) 
   {
     TbbOpenMPMixedScope threadLimiter;  // Limits OpenMP threads since we're mixing TBB and OpenMP
     treeTraversal::DepthFirstForestParallel(*this, rootsContainer, Data::EliminationPreOrderVisitor,
-                                            visitorPost, 10);
+                                            visitorPost);
   }
 
   // Create BayesTree from roots stored in the dummy BayesTree node.

@@ -533,7 +533,9 @@ namespace gtsam {
 
       /** protected constructor takes sigma */
       Isotropic(size_t dim, double sigma) :
-        Diagonal(Vector::Constant(dim, sigma)),sigma_(sigma),invsigma_(1.0/sigma) {}
+        Diagonal(Vector(0)),sigma_(sigma),invsigma_(1.0/sigma) {
+          dim_ = dim;
+        }
 
     public:
 
@@ -695,6 +697,10 @@ namespace gtsam {
       /// Compute loss from the m-estimator using the Mahalanobis distance.
       double loss(const double squared_distance) const override {
         return robust_->loss(std::sqrt(squared_distance));
+      }
+
+      double squaredMahalanobisDistance(const Vector& v) const override {
+        return noise_->squaredMahalanobisDistance(v);
       }
 
       // These are really robust iterated re-weighting support functions

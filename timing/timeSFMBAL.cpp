@@ -31,7 +31,7 @@ constexpr const char* kProfileDataset = "dubrovnik-135-90642-pre";
 
 std::string usage() {
   return "Usage: timeSFMBAL [--colamd] [--profile] "
-         "[--benchmark-action-json FILE] [BALfile]";
+         "[--benchmark-action-json FILE] [BALfile]"; // test
 }
 
 struct TimingRow {

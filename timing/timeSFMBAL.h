@@ -74,7 +74,7 @@ inline NonlinearFactorGraph buildGeneralSfmGraph(
 
   NonlinearFactorGraph graph;
   std::vector<bool> hasCameraMeasurement(db.numberCameras(), false);
-  for (size_t j = 0; j < db.numberTracks(); j++) {
+  for (size_t j = 0; j < db.numberTracks(); j++) { /// test
     auto& measurements = db.tracks[j].measurements;
     if (measurements.size() < 2) continue;
     for (const SfmMeasurement& measurement : measurements) {

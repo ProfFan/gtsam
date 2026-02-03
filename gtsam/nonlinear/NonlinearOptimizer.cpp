@@ -159,6 +159,7 @@ VectorValues NonlinearOptimizer::solve(const GaussianFactorGraph& gfg,
       throw std::runtime_error(
           "NonlinearOptimizer::solve: cg parameter has to be assigned ...");
 
+    // Nonsense diff
     if (auto pcg = std::dynamic_pointer_cast<PCGSolverParameters>(
             params.iterativeParams)) {
       delta = PCGSolver(*pcg).optimize(gfg);
